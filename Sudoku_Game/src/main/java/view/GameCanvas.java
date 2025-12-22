@@ -22,10 +22,10 @@ public class GameCanvas extends JPanel {
                 cell.setHorizontalAlignment(JTextField.CENTER);
                 cell.setFont(font);
 
-                int top = (r % 3 == 0) ? 2 : 1;
-                int left = (c % 3 == 0) ? 2 : 1;
-                int bottom = (r == 8) ? 2 : 1;
-                int right = (c == 8) ? 2 : 1;
+                int top = (r % 3 == 0) ? 4 : 1;
+                int left = (c % 3 == 0) ? 4 : 1;
+                int bottom = (r == 8) ? 4 : 1;
+                int right = (c == 8) ? 4 : 1;
                 cell.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, Color.BLACK));
                 
                 cell.putClientProperty("row", r);
