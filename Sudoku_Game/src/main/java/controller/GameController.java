@@ -133,13 +133,25 @@ public class GameController implements Viewable, Controllable {
      */
     @Override
     public String verifyGame(Game game) {
-        String status = SudokuVerifier.verify(game.board);
+        FlyweightVerifier worker = new FlyweightVerifier(game.board);
+        Thread thread = new Thread(worker);
+        
+        thread.start();
+        
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "ERROR";
+        }
+        
+        String status = worker.getResult();
+        
         if (status.equals("VALID")) {
-            storage.deleteIncomplete();
+            storage.deleteCurrent();
         }
         return status;
     }
-
     /**
      *
      * @param game

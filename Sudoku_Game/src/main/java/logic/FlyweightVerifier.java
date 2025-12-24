@@ -2,35 +2,54 @@ package logic;
 
 import java.util.List;
 
-
-public class FlyweightVerifier {
+public class FlyweightVerifier implements Runnable {
     
-    public static boolean isValid(int[][] board, List<int[]> pos, int[] val) {
+    private final int[][] board;
+    private String result;
 
-        for (int i = 0; i < pos.size(); i++) {
-            int r = pos.get(i)[0];
-            int c = pos.get(i)[1];
-            int v = val[i];
+    public FlyweightVerifier(int[][] board) {
+        this.board = board;
+    }
 
-            for (int j = 0; j < pos.size(); j++) {
-                if (i != j && val[j] == v) {
-                    int r2 = pos.get(j)[0];
-                    int c2 = pos.get(j)[1];
-                    if (r == r2 || c == c2 || (r/3 == r2/3 && c/3 == c2/3))
-                        return false;
+    @Override
+    public void run() {
+        this.result = SudokuVerifier.verify(board);
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+ 
+    public static boolean isValid(int[][] originalBoard, List<int[]> positions, int[] values) {
+        for (int i = 0; i < positions.size(); i++) {
+            for (int j = i + 1; j < positions.size(); j++) {
+                if (values[i] == values[j]) {
+                    if (areInSameUnit(positions.get(i), positions.get(j))) return false;
                 }
             }
-
-            for (int k = 0; k < 9; k++)
-                if (board[r][k] == v || board[k][c] == v)
-                    return false;
-
-            int sr = r - r % 3, sc = c - c % 3;
-            for (int i2 = 0; i2 < 3; i2++)
-                for (int j2 = 0; j2 < 3; j2++)
-                    if (board[sr+i2][sc+j2] == v)
-                        return false;
+            int r = positions.get(i)[0];
+            int c = positions.get(i)[1];
+            if (!isSafeOnBoard(originalBoard, r, c, values[i])) return false;
         }
+        return true;
+    }
+
+    private static boolean areInSameUnit(int[] p1, int[] p2) {
+        return (p1[0] == p2[0]) || (p1[1] == p2[1]) || 
+               ((p1[0]/3 == p2[0]/3) && (p1[1]/3 == p2[1]/3));
+    }
+
+    private static boolean isSafeOnBoard(int[][] board, int row, int col, int val) {
+        for (int i = 0; i < 9; i++) {
+            if (board[row][i] == val) return false;
+            if (board[i][col] == val) return false;
+        }
+        int boxR = row - row % 3;
+        int boxC = col - col % 3;
+        for (int i = 0; i < 3; i++) 
+            for (int j = 0; j < 3; j++) 
+                if (board[boxR+i][boxC+j] == val) return false;
         return true;
     }
 }

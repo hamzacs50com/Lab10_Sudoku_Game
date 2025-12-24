@@ -57,4 +57,8 @@ public class StorageManager {
     public void deleteSource(String path) {
         try { Files.deleteIfExists(Paths.get(path)); } catch (IOException e) { }
     }
+    
+    public void deleteCurrent() {
+        deleteIncomplete();
+    }
 }
