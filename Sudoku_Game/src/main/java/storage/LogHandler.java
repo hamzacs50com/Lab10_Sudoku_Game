@@ -9,13 +9,13 @@ public class LogHandler {
     private final String logFilePath;
 
     public LogHandler(String rootPath) {
-        this.logFilePath = Paths.get(rootPath, "current", "game.log").toString();
+        this.logFilePath = Paths.get(rootPath, "incomplete", "game.log").toString();
     }
 
     public void log(String entry) throws IOException {
         Files.write(Paths.get(logFilePath),
             (entry + System.lineSeparator()).getBytes(),
-            StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.SYNC);
     }
 
     public void undo(int[][] board) throws IOException {
@@ -46,6 +46,8 @@ public class LogHandler {
     }
     
     public void deleteLog() {
-        new File(logFilePath).delete();
+        try {
+            Files.deleteIfExists(Paths.get(logFilePath));
+        } catch (IOException e) { e.printStackTrace(); }
     }
 }

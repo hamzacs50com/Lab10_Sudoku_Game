@@ -20,9 +20,9 @@ public class GameController implements Viewable, Controllable {
 
     @Override
     public Catalog getCatalog() {
-        boolean hasCurrent = new File("storage/current/game.txt").exists();
+        boolean hasUnfinished = new File("storage/incomplete/game.txt").exists();
         boolean hasAll = hasFiles("easy") && hasFiles("medium") && hasFiles("hard");
-        return new Catalog(hasCurrent, hasAll);
+        return new Catalog(hasUnfinished, hasAll);
     }
 
     private boolean hasFiles(String dir) {
@@ -55,21 +55,24 @@ public class GameController implements Viewable, Controllable {
         return loadRawBoard(d);
     }
 
-    private int[][] loadRawBoard(DifficultyEnum d) throws NotFoundException {
+  private int[][] loadRawBoard(DifficultyEnum d) throws NotFoundException {
         try {
             int[][] loadedBoard;
             if (d == DifficultyEnum.INCOMPLETE) {
-                loadedBoard = storage.loadBoard("storage/current/game.txt");
+                loadedBoard = storage.loadBoard("storage/incomplete/game.txt");
             } else {
                 File f = new File("storage/" + d.name().toLowerCase());
                 if (!f.exists() || f.listFiles() == null || f.listFiles().length == 0) {
                      throw new IOException("No files found");
                 }
-                loadedBoard = storage.loadBoard(f.listFiles()[0].getPath());
+                String sourcePath = f.listFiles()[0].getPath();
+                loadedBoard = storage.loadBoard(sourcePath);
+                
+                storage.deleteSource(sourcePath);
             }
 
             this.currentBoard = loadedBoard;
-            storage.saveBoard(this.currentBoard, "storage/current/game.txt");
+            storage.saveBoard(this.currentBoard, "storage/incomplete/game.txt");
 
             return loadedBoard;
         } catch (IOException e) {
@@ -132,7 +135,7 @@ public class GameController implements Viewable, Controllable {
     public String verifyGame(Game game) {
         String status = SudokuVerifier.verify(game.board);
         if (status.equals("VALID")) {
-            storage.deleteCurrent();
+            storage.deleteIncomplete();
         }
         return status;
     }
@@ -207,7 +210,7 @@ public class GameController implements Viewable, Controllable {
     public void logUserAction(String action) throws IOException {
         storage.log(action);
         if (currentBoard != null) {
-            storage.saveBoard(currentBoard, "storage/current/game.txt");
+            storage.saveBoard(currentBoard, "storage/incomplete/game.txt");
         }
     }
 
@@ -223,7 +226,7 @@ public class GameController implements Viewable, Controllable {
     public void undoLastMove() throws IOException {
         if (currentBoard != null) {
             storage.undo(currentBoard);
-            storage.saveBoard(currentBoard, "storage/current/game.txt");
+            storage.saveBoard(currentBoard, "storage/incomplete/game.txt");
         }
     }
 
